@@ -1,0 +1,40 @@
+networks:
+  pr-network:
+    driver: bridge
+
+services:
+  pr-api:
+    build:
+      context: ./
+      dockerfile: ./cmd/api/Dockerfile
+    container_name: pr-api
+    networks:
+      - pr-network
+    env_file:
+      - ./.env
+    ports:
+      - "8080:8080"
+  
+  pr-migrators:
+    build:
+      context: ./
+      dockerfile: ./cmd/migrator/Dockerfile
+    container_name: pr-migrators
+    networks:
+      - pr-network
+    env_file:
+      - ./.env
+    ports:
+      - "9092:8080"
+
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    networks:
+      - pr-network
+    ports:
+      - "6432:5432"
+    restart: unless-stopped
